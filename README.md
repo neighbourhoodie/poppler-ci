@@ -41,7 +41,7 @@ by the Create Refs task
 
 ## Getting Started
 
-### Prerequisistes
+### Prerequisites
 
 - Docker
 - Docker Compose
