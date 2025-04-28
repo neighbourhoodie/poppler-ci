@@ -54,7 +54,7 @@ that, check out the `poppler-buildbot` repository.
 ```shell
 cd poppler-buildbot
 cd worker
-docker built -t poppler-ci-test1 .
+docker build -t poppler-ci-test1 .
 ```
 ### Running the Service (locally)
 
