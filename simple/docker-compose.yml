@@ -16,6 +16,8 @@ services:
       - db
     ports:
       - "8010:8010"
+    volumes:
+      - "../master.cfg:/buildbot/master.cfg"
   db:
     env_file:
       - db.env
@@ -24,7 +26,7 @@ services:
       - 5432
 
   worker:
-    image: "buildbot/buildbot-worker:master"
+    image: "poppler-ci-test1"
     environment:
       BUILDMASTER: buildbot
       BUILDMASTER_PORT: 9989
