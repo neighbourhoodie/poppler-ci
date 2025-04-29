@@ -26,7 +26,7 @@ services:
       - 5432
 
   worker:
-    image: "poppler-ci-test1"
+    image: "poppler-worker"
     environment:
       BUILDMASTER: buildbot
       BUILDMASTER_PORT: 9989
