@@ -96,6 +96,13 @@ later use `docker compose down` to stop them again.
 
 ## Running the Service (in production)
 
+### Authorization
+
+`nginx` with [basic auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/) is used to restrict access to certain parts of the CI. To grant access to certain users:
+
+1. Create a file `.htpasswd` in the `/etc` directory.
+2. Generate a user + hashed password pair and include it into the `.htpasswd` file
+
 TODO:
 - letsencrypt?
 - auth?
