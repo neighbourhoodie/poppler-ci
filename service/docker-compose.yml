@@ -1,4 +1,3 @@
-version: '2'
 services:
   buildbot:
     image: buildbot/buildbot-master:master
