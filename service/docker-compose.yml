@@ -31,4 +31,4 @@ services:
     volumes:
     - ./etc:/etc/nginx
     ports:
-    - "8080:80"
+    - "8010:80"
