@@ -1,0 +1,252 @@
+#!/usr/bin/env bash
+
+# This script manages the sets of reference outputs that Poppler uses as part
+# of its snapshot testing workflow. Each reference set is a directory with two
+# subdirectories:
+#
+# - sources: contains PDF files to be used as input for tests
+# - outputs: the result of running the `create-refs` tool on the files in `sources`
+#
+# The `outputs` directory contains a subdirectory for each file in `sources`,
+# which contains the results of converting that file to other formats. A
+# typical reference set looks something like this:
+#
+#     .
+#     ├── sources
+#     │   ├── blend.pdf
+#     │   ├── cropbox.pdf
+#     │   ├── encoding.pdf
+#     │   ...
+#     │
+#     └── outputs
+#         ├── blend.pdf
+#         │   ├── cairo-1.png
+#         │   ├── cairo.md5
+#         │   ├── postscript.md5
+#         │   ├── postscript.ps
+#         │   ├── splash-1.png
+#         │   ├── splash.md5
+#         │   ├── text.md5
+#         │   └── text.txt
+#         ├── cropbox.pdf
+#         │   ├── cairo-1.png
+#         │   ├── cairo.md5
+#         │   ├── postscript.md5
+#         │   ├── postscript.ps
+#         │   ├── splash-1.png
+#         │   ├── splash.md5
+#         │   ├── text.md5
+#         │   └── text.txt
+#         ...
+#
+# There are a number of distinct reference sets (i.e. sets of source PDFs and
+# their converted outputs) that this script manages, and each lives in a
+# distinct directory under `refs/`:
+#
+# - `refs/unittestcases`: The `unittestcases` directory in the `poppler/test` repository
+# - `refs/tests`: The `tests` directory in the `poppler/test` repository
+# - `refs/corpus`: A large corpus obtained from a list of URLs kept in `refs/manifest.txt`
+#
+# The `refs` directory should be kept on the host machine and mounted into the
+# Buildbot Docker containers so that these sets persist between builds.
+#
+# The script tries to mimimise how long is spent running `create-refs` to
+# update the reference outputs by only running it on new files. New files that
+# appear in the URL manifest or `poppler/test` repo are first copied to a
+# temporary directory, and `create-refs` is run over just the files in that
+# temporary location. On completion, the source files and outputs are copied
+# into the main `sources` and `outputs` directory for that reference set.
+#
+# The following options are supported:
+#
+#     --refs-path <PATH>
+#           The path to the `refs` directory reliative to $PWD
+#
+#     --poppler-path <PATH>
+#           The path to the root of the `poppler` repository; the script
+#           assumes Poppler has already been compiled.
+#
+#     --from-corpus
+#           Update the `refs/corpus` set based on the contents of
+#           `refs/manifest.txt`
+#
+#     --from-test-repo
+#           Update the `refs/unittestcases` and `refs/tests` sets based on the
+#           `poppler/test` repository
+#
+#     --from-all
+#           Update all the reference sets
+
+set -euo pipefail
+
+MANIFEST='manifest.txt'
+TEST_REPO='https://gitlab.freedesktop.org/poppler/test.git'
+
+REFS_PATH=''
+POPPLER_PATH=''
+UPDATE_MODE=''
+USE_FORCE=no
+
+main () {
+  while [[ $# -gt 0 ]] ; do
+    case "$1" in
+      --refs-path)
+        REFS_PATH="$(realpath "$2")"
+        shift 2
+        ;;
+      --poppler-path)
+        POPPLER_PATH="$(realpath "$2")"
+        shift 2
+        ;;
+      --from-all)
+        UPDATE_MODE='all'
+        shift 1
+        ;;
+      --from-corpus)
+        UPDATE_MODE='corpus'
+        shift 1
+        ;;
+      --from-test-repo)
+        UPDATE_MODE='test_repo'
+        shift 1
+        ;;
+      --force)
+        USE_FORCE=yes
+        shift 1
+        ;;
+      *)
+        fail "Unrecognised argument: $1"
+    esac
+  done
+
+  if [[ -z "$REFS_PATH" ]] ; then
+    fail 'Required argument --refs-path is not set'
+  fi
+
+  if [[ -z "$POPPLER_PATH" ]] ; then
+    fail 'Required argument --poppler-path is not set'
+  fi
+
+  case "$UPDATE_MODE" in
+    all)
+      update_refs_from_test_repo
+      update_refs_from_corpus
+      ;;
+    corpus)
+      update_refs_from_corpus
+      ;;
+    test_repo)
+      update_refs_from_test_repo
+      ;;
+    *)
+      fail 'Must specify either --from-all, --from-corpus, or --from-test-repo'
+  esac
+}
+
+update_refs_from_corpus () {
+  local corpus_dir="$REFS_PATH/corpus"
+  local manifest_path="$REFS_PATH/$MANIFEST" 
+
+  prepare_directory_structure "$corpus_dir"
+
+  download_new_files "$manifest_path" \
+      "$corpus_dir/sources" "$corpus_dir/tmp/sources"
+
+  generate_new_refs "$corpus_dir"
+}
+
+download_new_files () {
+  local manifest_path="$1"
+  local src_dir="$2"
+  local dst_dir="$3"
+
+  local filename
+  local url
+
+  if [[ ! -f "$manifest_path" ]] ; then
+    fail "Manifest file not found at: $manifest_path"
+  fi
+
+  cat "$manifest_path" | while read -r filename url ; do
+    if [[ ! -e "$src_dir/$filename" || "$USE_FORCE" == yes ]] ; then
+      echo "Fetching: $url ..."
+      curl "$url" -o "$dst_dir/$filename"
+    fi
+  done
+}
+
+update_refs_from_test_repo () {
+  local repo_path="$REFS_PATH/test-repo"
+  fetch_repo "$TEST_REPO" "$repo_path"
+
+  create_refs_from_test_repo "$repo_path/unittestcases" "$REFS_PATH/unittestcases"
+  create_refs_from_test_repo "$repo_path/tests" "$REFS_PATH/tests"
+}
+
+fetch_repo () {
+  local url="$1"
+  local repo_path="$2"
+
+  if [[ -d "$repo_path" ]] ; then
+    cd "$repo_path"
+    git pull
+    cd -
+  else
+    git clone "$url" "$repo_path"
+  fi
+}
+
+create_refs_from_test_repo () {
+  local src_dir="$1"
+  local dst_dir="$2"
+  local filepath
+  local filename
+
+  prepare_directory_structure "$dst_dir"
+
+  for filepath in "$src_dir"/* ; do
+    filename="$(basename "$filepath")"
+    if [[ "$filename" != *.pdf || ! -e "$dst_dir/sources/$filename" || "$USE_FORCE" == yes ]] ; then
+      cp -r "$filepath" "$dst_dir/tmp/sources/$filename"
+    fi
+  done
+
+  generate_new_refs "$dst_dir"
+}
+
+prepare_directory_structure () {
+  local dir="$1"
+
+  mkdir -p "$dir/sources"
+  mkdir -p "$dir/outputs"
+
+  mkdir -p "$dir/tmp/sources"
+  mkdir -p "$dir/tmp/outputs"
+}
+
+generate_new_refs () {
+  local dst_dir="$1"
+
+  create_refs "$dst_dir"/tmp/{sources,outputs}
+
+  rsync -a "$dst_dir"/{tmp/,}/sources/
+  rsync -a "$dst_dir"/{tmp/,}/outputs/
+
+  rm -rf "$dst_dir/tmp"
+}
+
+create_refs () {
+  local src_dir="$1"
+  local dst_dir="$2"
+
+  cd "$POPPLER_PATH/regtest"
+  ./poppler-regtest create-refs --refs-dir "$dst_dir" "$src_dir"
+  cd -
+}
+
+fail () {
+  echo "[error] $1" >&2
+  exit 1
+}
+
+main "$@"
