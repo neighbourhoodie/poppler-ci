@@ -22,7 +22,8 @@ services:
       WORKERPASS: pass
       WORKER_ENVIRONMENT_BLACKLIST: DOCKER_BUILDBOT* BUILDBOT_ENV_* BUILDBOT_1* WORKER_ENVIRONMENT_BLACKLIST
     volumes:
-      - "../refs:/buildbot/refs"
+      - ../outputs:/buildbot/outputs
+      - ../refs:/buildbot/refs
     links:
       - buildbot
 
