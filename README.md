@@ -2,6 +2,19 @@
 
 This repository contains the static infrastructure definition for the Poppler CI service. The infrastructure uses [Docker Compose]() and [Buildbot](https://buildbot.net).
 
+  - [Overview](#overview)
+    - [Buildbot](#buildbot)
+    - [Workers](#workers)
+      - [Build \& Test](#build--test)
+      - [Fetch Sources \& Create Refs](#fetch-sources--create-refs)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Worker set up](#worker-set-up)
+    - [Building the Workers](#building-the-workers)
+    - [Running the Service (locally)](#running-the-service-locally)
+  - [Running the Service (in production)](#running-the-service-in-production)
+    - [Authorization](#authorization)
+
 ## Overview
 
 The Poppler CI service consists of two main components:
