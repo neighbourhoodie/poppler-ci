@@ -22,14 +22,16 @@ services:
       WORKERPASS: pass
       WORKER_ENVIRONMENT_BLACKLIST: DOCKER_BUILDBOT* BUILDBOT_ENV_* BUILDBOT_1* WORKER_ENVIRONMENT_BLACKLIST
     volumes:
-      - ../outputs:/buildbot/outputs
       - ../refs:/buildbot/refs
+      - ../outputs:/buildbot/outputs
     links:
       - buildbot
 
   nginx:
     image: nginx
     volumes:
-    - ./etc:/etc/nginx
+      - ./etc:/etc/nginx
+      - ../refs:/public/refs
+      - ../outputs:/public/outputs
     ports:
-    - "8010:80"
+      - "8010:80"
