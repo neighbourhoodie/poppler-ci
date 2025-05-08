@@ -2,6 +2,19 @@
 
 This repository contains the static infrastructure definition for the Poppler CI service. The infrastructure uses [Docker Compose]() and [Buildbot](https://buildbot.net).
 
+  - [Overview](#overview)
+    - [Buildbot](#buildbot)
+    - [Workers](#workers)
+      - [Build \& Test](#build--test)
+      - [Fetch Sources \& Create Refs](#fetch-sources--create-refs)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Worker set up](#worker-set-up)
+    - [Building the Workers](#building-the-workers)
+    - [Running the Service (locally)](#running-the-service-locally)
+  - [Running the Service (in production)](#running-the-service-in-production)
+    - [Authorization](#authorization)
+
 ## Overview
 
 The Poppler CI service consists of two main components:
@@ -95,6 +108,28 @@ You can use `docker-compose up -d` to start all services in the background and
 later use `docker compose down` to stop them again.
 
 ## Running the Service (in production)
+
+### Authorization
+
+`nginx` with [basic auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/) is used to restrict access to certain parts of the CI. To create and manage user credentials, you can use a tool like `htpasswd`. At the root of the project, run the following command, replacing `USERNAME` with your chosen username:
+
+```sh
+htpasswd -c ./service/etc/.htpasswd <USERNAME>
+```
+
+You'll be prompted to enter and confirm a password. This command creates a `.htpasswd` file containing the username and a hashed password.
+
+To manage access:
+- Add a new user to an existing file
+```sh
+htpasswd ./service/etc/.htpasswd <USERNAME>
+```
+- To delete a user
+```sh
+htpasswd -D ./service/etc/.htpasswd <USERNAME>
+```
+Or manually delete the line with that username from the file.
+
 
 TODO:
 - letsencrypt?
