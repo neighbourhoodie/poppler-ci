@@ -13,6 +13,8 @@ This repository contains the static infrastructure definition for the Poppler CI
     - [Building the Workers](#building-the-workers)
     - [Running the Service (locally)](#running-the-service-locally)
   - [Running the Service (in production)](#running-the-service-in-production)
+    - [Prerequisites for the initial set up](#prerequisites-for-the-initial-set-up)
+    - [TLS](#tls)
     - [Authorization](#authorization)
 
 ## Overview
@@ -109,12 +111,54 @@ later use `docker compose down` to stop them again.
 
 ## Running the Service (in production)
 
+### Prerequisites for the initial set up
+
+- A server, and ssh with root access to it
+- A domain name set up to point to the server's IP address
+- The ability to git clone this repo onto the server, or get it there some other way
+- Be able to install on the server:
+  - Docker
+  - Docker Compose (`apt install -y docker-compose`)
+  - htpasswd (`apt install -y apache2-utils`)
+
+### TLS
+
+To enable HTTPS in buildbot's website, Certbot is used. To set it up and allow Let's encrypt to issue the TLS certificate, follow these steps:
+
+1. Locate yourself at the root of the project folder `poppler-ci`
+2. Create an `.env` file with your variables:
+
+```sh
+cp ./service/.env.default ./service/.env
+```
+
+and with the editor of your choice (we're demoing with `nano`), fill the variables:
+```sh
+nano ./service/.env
+```
+
+2. Run the installation script
+
+Go to the `service` folder, give execution permissions to the `certbot-install.sh` script, and run it:
+```sh
+cd ./service
+chmod +x certbot-install.sh
+./certbot-install.sh
+```
+
+This script will create the necessary directories and use Certbot to request the certificate to Let's encrypt.
+
+The TLS certificate expires every 90 days. For automatic renewal, a cron job has been set up by the script at `/etc/cron.d/renew_certificate_job`, which will run on the first of each month. This job will call the `/renew-certificate.sh` script. Logs from that script go to `/var/log/syslog` and have the renew-cert prefix.
+
+> [!NOTE]  
+> The certificate renewal cronjob assumes that the path to the repository is `/root/poppler-ci`. If this is not the case, please modify `/etc/cron.d/renew_certificate_job` accordingly.
+
 ### Authorization
 
 `nginx` with [basic auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/) is used to restrict access to certain parts of the CI. To create and manage user credentials, you can use a tool like `htpasswd`. At the root of the project, run the following command, replacing `USERNAME` with your chosen username:
 
 ```sh
-htpasswd -c ./service/etc/.htpasswd <USERNAME>
+htpasswd -c ./service/etc/nginx/.htpasswd <USERNAME>
 ```
 
 You'll be prompted to enter and confirm a password. This command creates a `.htpasswd` file containing the username and a hashed password.
@@ -122,15 +166,15 @@ You'll be prompted to enter and confirm a password. This command creates a `.htp
 To manage access:
 - Add a new user to an existing file
 ```sh
-htpasswd ./service/etc/.htpasswd <USERNAME>
+htpasswd ./service/etc/nginx/.htpasswd <USERNAME>
 ```
 - To delete a user
 ```sh
-htpasswd -D ./service/etc/.htpasswd <USERNAME>
+htpasswd -D ./service/etc/nginx/.htpasswd <USERNAME>
 ```
 Or manually delete the line with that username from the file.
 
 
 TODO:
-- letsencrypt?
 - auth?
+- remove all instances of `poppler-ci-test1` (rename it for something better)
