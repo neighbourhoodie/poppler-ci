@@ -157,8 +157,8 @@ update_refs_from_corpus () {
 
 download_new_files () {
   local manifest_path="$1"
-  local src_dir="$2"
-  local dst_dir="$3"
+  local dst_dir="$2"
+  local src_dir="$3"
 
   local filename
   local url
@@ -206,8 +206,8 @@ create_refs_from_test_repo () {
 
   for filepath in "$src_dir"/* ; do
     filename="$(basename "$filepath")"
-    if [[ "$filename" != *.pdf || ! -e "$dst_dir/sources/$filename" || "$USE_FORCE" == yes ]] ; then
-      cp -r "$filepath" "$dst_dir/tmp/sources/$filename"
+    if [[ "$filename" != *.pdf || ! -e "$dst_dir/tmp/sources/$filename" || "$USE_FORCE" == yes ]] ; then
+      cp -r "$filepath" "$dst_dir/sources/$filename"
     fi
   done
 
@@ -217,22 +217,36 @@ create_refs_from_test_repo () {
 prepare_directory_structure () {
   local dir="$1"
 
-  mkdir -p "$dir/sources"
-  mkdir -p "$dir/outputs"
+  prepare_tmp_directory "$dir" 'sources'
+  prepare_tmp_directory "$dir" 'outputs'
+}
 
-  mkdir -p "$dir/tmp/sources"
-  mkdir -p "$dir/tmp/outputs"
+prepare_tmp_directory () {
+  local dir="$1"
+  local name="$2"
+
+  mkdir -p "$dir/$name"
+  mkdir -p "$dir/tmp"
+  mv "$dir/$name" "$dir/tmp/$name"
+  mkdir -p "$dir/$name"
+}
+
+merge_tmp_directory () {
+  local dir="$1"
+  local name="$2"
+
+  rsync -a "$dir/$name/" "$dir/tmp/$name/"
+  rm -rf "$dir/$name"
+  mv "$dir/tmp/$name" "$dir/$name"
 }
 
 generate_new_refs () {
-  local dst_dir="$1"
+  local dir="$1"
 
-  create_refs "$dst_dir"/tmp/{sources,outputs}
+  create_refs "$dir"/{sources,outputs}
 
-  rsync -a "$dst_dir"/{tmp/,}/sources/
-  rsync -a "$dst_dir"/{tmp/,}/outputs/
-
-  rm -rf "$dst_dir/tmp"
+  merge_tmp_directory "$dir" 'sources'
+  merge_tmp_directory "$dir" 'outputs'
 }
 
 create_refs () {
