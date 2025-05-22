@@ -29,9 +29,14 @@ services:
 
   nginx:
     image: nginx
+    env_file:
+      - .env
     volumes:
-      - ./etc:/etc/nginx
       - ../refs:/public/refs
       - ../outputs:/public/outputs
+      - ./etc/nginx:/etc/nginx
+      - ./etc/letsencrypt:/etc/letsencrypt
+      - ./var/lib/letsencrypt:/var/lib/letsencrypt
     ports:
-      - "8010:80"
+      - "80:80"
+      - "443:443"
