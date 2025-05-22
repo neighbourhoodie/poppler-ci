@@ -98,6 +98,8 @@ For testing this setup locally or on a server, you can follow these steps.
 
 ```shell
 cd service
+# create the nginx directory to store the template output
+mkdir -p ./etc/nginx/conf.d
 # edit docker-compose.yaml in the `worker` section to point to `poppler-ci-test1`
 docker-compose up
 ```

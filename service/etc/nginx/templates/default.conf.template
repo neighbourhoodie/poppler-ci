@@ -17,13 +17,26 @@ http {
   server {
     listen 443 ssl;
     server_name www.${DOMAIN} ${DOMAIN};
+    root /public;
 
     ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
+    types {
+      application/pdf         pdf;
+      application/postscript  ps;
+      image/png               png;
+      text/html               html;
+      text/plain              md5 stderr txt;
+    }
+
     location / {
       auth_basic "Administrator's Area";
       auth_basic_user_file /etc/nginx/.htpasswd;
+      try_files $uri @buildbot;
+    }
+
+    location @buildbot {
       proxy_pass http://buildbot:8010;
 
       proxy_set_header REMOTE_USER $remote_user;
