@@ -16,6 +16,8 @@ echo "Setting up Letsencrypt…"
 mkdir -p ./etc/letsencrypt
 mkdir -p ./var/lib/letsencrypt
 
+mkdir -p ./etc/nginx/conf.d
+
 sudo docker run -it --rm \
  -p 80:80 -p 443:443 \
  --name certbot \
