@@ -27,16 +27,23 @@ services:
     links:
       - buildbot
 
-  nginx:
+  nginx_frontend:
     image: nginx
     env_file:
       - .env
     volumes:
-      - ../refs:/public/refs
-      - ../outputs:/public/outputs
-      - ./etc/nginx:/etc/nginx
+      - ./etc/nginx-frontend:/etc/nginx
       - ./etc/letsencrypt:/etc/letsencrypt
       - ./var/lib/letsencrypt:/var/lib/letsencrypt
     ports:
       - "80:80"
       - "443:443"
+
+  nginx_backend:
+    image: nginx
+    volumes:
+      - ./etc/nginx-backend:/etc/nginx
+      - ../refs:/public/refs
+      - ../outputs:/public/outputs
+    ports:
+      - "8010:80"

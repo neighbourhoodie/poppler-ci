@@ -160,7 +160,7 @@ The TLS certificate expires every 90 days. For automatic renewal, a cron job has
 `nginx` with [basic auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/) is used to restrict access to certain parts of the CI. To create and manage user credentials, you can use a tool like `htpasswd`. At the root of the project, run the following command, replacing `USERNAME` with your chosen username:
 
 ```sh
-htpasswd -c ./service/etc/nginx/.htpasswd <USERNAME>
+htpasswd -c ./service/etc/nginx-backend/.htpasswd <USERNAME>
 ```
 
 You'll be prompted to enter and confirm a password. This command creates a `.htpasswd` file containing the username and a hashed password.
@@ -168,11 +168,11 @@ You'll be prompted to enter and confirm a password. This command creates a `.htp
 To manage access:
 - Add a new user to an existing file
 ```sh
-htpasswd ./service/etc/nginx/.htpasswd <USERNAME>
+htpasswd ./service/etc/nginx-backend/.htpasswd <USERNAME>
 ```
 - To delete a user
 ```sh
-htpasswd -D ./service/etc/nginx/.htpasswd <USERNAME>
+htpasswd -D ./service/etc/nginx-backend/.htpasswd <USERNAME>
 ```
 Or manually delete the line with that username from the file.
 
