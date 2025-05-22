@@ -27,6 +27,17 @@ services:
     links:
       - buildbot
 
+  flask:
+    image: "poppler-ci-test1"
+    working_dir: /buildbot/web
+    command: flask run --debug --host=0.0.0.0
+    volumes:
+      - ../web:/buildbot/web
+      - ../refs:/buildbot/refs
+      - ../outputs:/buildbot/outputs
+    ports:
+      - "5000:5000"
+
   nginx_frontend:
     image: nginx
     env_file:
