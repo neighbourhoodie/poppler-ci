@@ -21,11 +21,18 @@ service. The infrastructure uses [Docker Compose]() and
 
 ## Overview
 
-The Poppler CI service consists of two main components:
+The Poppler CI service consists of several components:
 
 1. A Buildbot instance that is configured to run the various tasks needed to
    provide the service.
 2. A set of _workers_ that provide the environment where all tasks can run.
+3. A Flask application that provides admin functions not available directly via
+   Buildbot.
+4. A "backend" nginx server that provides access to Buildbot, the Flask admin
+   app, and static files such as HTML build reports, and also implements HTTP
+   Basic Auth.
+5. A "frontend" nginx server designed for production, which implements HTTPS and
+   endpoints needed to support Certbot, and proxies to the "backend" nginx.
 
 ### Buildbot
 
@@ -36,28 +43,47 @@ events.
 
 ### Workers
 
-#### Build & Test
-
 This worker provides an environment that can build the Poppler sources and run
 its test suite. It captures build output and compares it to a stable set of
 expected “references” (or refs) and provide a report containing a visual diff of
 the unexpected results.
 
-TBD: there will be a way to accept new refs from the process as expected for
-future CI runs.
+The reference sources and outputs are kept in the `refs` directory. At the start
+of each test run, these refs are updated from two sources:
 
-#### Fetch Sources & Create Refs
+- A list of filenames and URLs stored in `refs/manifest`
+- The `unittestcases` and `tests` suites in the repository
+  `https://gitlab.freedesktop.org/poppler/test`
 
-This worker downloads all files listed in a `sources.txt` (TBD where this is
-maintained) file. From these sources, the worker creates a set of references in
-the form of `.ps`, `.text`. `.md5` and `.png` files and makes the those
-available in a shared directory on the build server so that the Build & Test
-worker can use it to compare its output to.
+Only files that do not already exist are added to the reference sets; all
+existing files remain as they are from previous test runs. Each "suite" of
+references reside in their own directory, e.g. `refs/unittestcases` for the unit
+tests, and `refs/corpus` for the sources listed in `refs/manifest.txt`. Under
+each of these directories is a `sources` directory containing the original PDFs,
+and an `outputs` directory containing the results of converting those PDFs to
+various other formats using Poppler.
 
-The Fetch Sources task is smart enough to not download a file twice.
+When a build is run, the outputs are regenerated and compared to those in
+`refs/*/outputs`. The results of each build are kept in
+`outputs/poppler-builder/build-N` where `N` is the build number indicated by
+Buildbot. An HTML report including diffs is generated and placed in this
+directory, and its URL is printed at the end of the test run. Only the outputs
+of failing tests are retained, and these can be used to update the refs if a
+maintainer decides that these failing tests actually represent desired changes.
 
-TODO: make sure that the accept-new-refs task does not get its results clobbered
-by the Create Refs task
+### Flask admin app
+
+This application provides admin functions that cannot be expressed directly in
+Buildbot. The application can be accessed via the url `/cmd` on the build
+server.
+
+The tasks available are:
+
+- **Update the refs from a build**: if a maintainer determines that a failed
+  build's outputs actually represent desired changes, they can "promote" those
+  outputs to become new references. By entering the build number into a form,
+  the `refs/update` script is invoked to copy files from the build's output
+  directory into `refs`.
 
 ## Getting Started
 
