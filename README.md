@@ -112,10 +112,6 @@ you want to set this up permanently on a server, there are more instructions
 below.
 
 ```shell
-cd service
-# create the nginx directory to store the template output
-mkdir -p ./etc/nginx/conf.d
-# edit docker-compose.yaml in the `worker` section to point to `poppler-ci-test1`
 docker-compose up
 ```
 
@@ -161,12 +157,10 @@ nano ./service/.env
 
 2. Run the installation script
 
-Go to the `service` folder, give execution permissions to the
-`certbot-install.sh` script, and run it:
+Go to the `service` folder and run `certbot-install.sh`:
 
 ```sh
 cd ./service
-chmod +x certbot-install.sh
 ./certbot-install.sh
 ```
 
