@@ -85,6 +85,7 @@ TEST_REPO='https://gitlab.freedesktop.org/poppler/test.git'
 REFS_PATH=''
 POPPLER_PATH=''
 UPDATE_MODE=''
+UPDATE_FROM_DIR=''
 USE_FORCE=no
 
 main () {
@@ -109,6 +110,11 @@ main () {
       --from-test-repo)
         UPDATE_MODE='test_repo'
         shift 1
+        ;;
+      --from-dir)
+        UPDATE_MODE='directory'
+        UPDATE_FROM_DIR="$(realpath "$2")"
+        shift 2
         ;;
       --force)
         USE_FORCE=yes
@@ -137,6 +143,9 @@ main () {
       ;;
     test_repo)
       update_refs_from_test_repo
+      ;;
+    directory)
+      update_refs_from_directory
       ;;
     *)
       fail 'Must specify either --from-all, --from-corpus, or --from-test-repo'
@@ -256,6 +265,69 @@ create_refs () {
   cd "$POPPLER_PATH/regtest"
   ./poppler-regtest create-refs --refs-dir "$dst_dir" "$src_dir"
   cd -
+}
+
+update_refs_from_directory () {
+  local suite
+  local filename
+
+  if [[ ! -d "$UPDATE_FROM_DIR" ]] ; then
+    fail "Directory does not exist: $UPDATE_FROM_DIR"
+  fi
+
+  for suite in "$UPDATE_FROM_DIR"/* ; do
+    filename="$(basename "$suite")"
+    update_by_recursive_compare "$suite" "$REFS_PATH/$filename/outputs"
+  done
+}
+
+update_by_recursive_compare () {
+  local src="$1"
+  local dst="$2"
+  local src_path
+  local dst_path
+  local filename
+
+  for src_path in "$src"/* ; do
+    filename="$(basename "$src_path")"
+    dst_path="$dst/$filename"
+
+    if [[ -d "$src_path" && -d "$dst_path" ]] ; then
+      update_by_recursive_compare "$src_path" "$dst_path"
+    fi
+
+    if [[ -f "$src_path" && -f "$dst_path" ]] ; then
+      rsync -a "$src_path" "$dst_path"
+      echo "updated: $dst_path"
+    fi
+  done
+
+  for dst_path in "$dst"/*.md5 ; do
+    if [[ -f "$dst_path" ]] ; then
+      update_md5 "$dst_path"
+    fi
+  done
+}
+
+update_md5 () {
+  local md5_path="$1"
+  local md5_dir="$(dirname "$md5_path")"
+  local md5_name="$(basename "$md5_path" .md5)"
+  local filepaths=()
+  local filepath
+
+  for filepath in "$md5_dir/$md5_name"* ; do
+    if [[ "$filepath" != *.md5 ]] ; then
+      filepaths+=("$filepath")
+    fi
+  done
+
+  if [[ "${#filepaths[@]}" -gt 0 ]] ; then
+    md5sum "${filepaths[@]}" > "$md5_path.tmp"
+    mv "$md5_path.tmp" "$md5_path"
+  fi
+
+  echo "updated: $md5_path"
 }
 
 fail () {

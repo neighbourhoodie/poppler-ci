@@ -27,6 +27,15 @@ services:
     links:
       - buildbot
 
+  flask:
+    build: ../web
+    volumes:
+      - ../web:/buildbot/web
+      - ../refs:/buildbot/refs
+      - ../outputs:/buildbot/outputs
+    ports:
+      - "5000:5000"
+
   nginx_frontend:
     image: nginx
     env_file:
