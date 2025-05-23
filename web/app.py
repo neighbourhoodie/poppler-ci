@@ -1,39 +1,31 @@
 import subprocess
-from flask import Flask, redirect, url_for, abort, request
+from flask import Flask, abort, render_template, request
+
+PREFIX = "/cmd"
 
 app = Flask(__name__)
 
-@app.route("/cmd")
+@app.route(PREFIX)
 def index():
-    return """
-    <h1>Poppler CI Admin</h1>
-    <ul>
-        <li>
-            <a href="/cmd/update-refs">Update refs from a build</a>
-        </li>
-    </ul>
-    """
+    return render_template("home.html")
 
-@app.get("/cmd/update-refs")
+@app.get(PREFIX + "/update-refs")
 def update_refs_form():
-    return """
-    <h1>Update refs from a build</h1>
+    return render_template("update_refs_form.html")
 
-    <form method="post" action="/cmd/update-refs">
-        <p><label for="build_number">Builder number</label>
-            <input type="number" id="build_number" name="build_number"></p>
-        <p><input type="submit" value="Go"></p>
-    </form>
-    """
-
-@app.post("/cmd/update-refs")
+@app.post(PREFIX + "/update-refs")
 def update_refs_submit():
     build_number = request.form["build_number"]
     build_dir = f"/buildbot/outputs/poppler-builder/build-{build_number}"
-    subprocess.run([
+
+    proc = subprocess.run([
         "/buildbot/refs/update",
         "--refs-path", "/buildbot/refs",
         "--poppler-path", "/tmp",
         "--from-dir", build_dir
-    ])
-    return redirect(url_for("index"))
+    ], capture_output=True)
+
+    return render_template("update_refs_result.html",
+        build_dir=build_dir,
+        stdout=proc.stdout.decode("utf-8"),
+        stderr=proc.stderr.decode("utf-8"))

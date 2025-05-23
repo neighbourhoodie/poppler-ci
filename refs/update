@@ -271,6 +271,10 @@ update_refs_from_directory () {
   local suite
   local filename
 
+  if [[ ! -d "$UPDATE_FROM_DIR" ]] ; then
+    fail "Directory does not exist: $UPDATE_FROM_DIR"
+  fi
+
   for suite in "$UPDATE_FROM_DIR"/* ; do
     filename="$(basename "$suite")"
     update_by_recursive_compare "$suite" "$REFS_PATH/$filename/outputs"
@@ -294,6 +298,7 @@ update_by_recursive_compare () {
 
     if [[ -f "$src_path" && -f "$dst_path" ]] ; then
       rsync -a "$src_path" "$dst_path"
+      echo "updated: $dst_path"
     fi
   done
 
@@ -321,6 +326,8 @@ update_md5 () {
     md5sum "${filepaths[@]}" > "$md5_path.tmp"
     mv "$md5_path.tmp" "$md5_path"
   fi
+
+  echo "updated: $md5_path"
 }
 
 fail () {
