@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Clean up build outputs</h1>
+
+  <form method="post" action="{{ url_for("cleanup_builds_submit") }}">
+    <p><label for="max_builds">Builds to keep</label>
+        <input type="number" id="max_builds" name="max_builds"></p>
+
+    <p><input type="submit" value="Go"></p>
+  </form>
+{% endblock %}
