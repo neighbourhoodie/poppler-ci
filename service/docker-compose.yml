@@ -9,6 +9,13 @@ services:
       BUILDBOT_WORKER_PORT: 9989
       BUILDBOT_WEB_URL: http://127.0.0.1:8010/
       BUILDBOT_WEB_PORT: tcp:port=8010
+      # default email settings for mailpit, see below
+      # adjust to real SMTP service in production
+      BUILDBOT_EMAIL_HOST: mailpit
+      BUILDBOT_EMAIL_PORT: 1025
+      BUILDBOT_EMAIL_USER: buildbot
+      BUILDBOT_EMAIL_PASS: buildbot
+      BUILDBOT_MAILNG_LIST: list@poppler.example.com
     volumes:
       - ../master.cfg:/buildbot/master.cfg
       - ../sqlite/:/buildbot/db/
@@ -56,3 +63,16 @@ services:
       - ../outputs:/public/outputs
     ports:
       - "8010:80"
+
+  # uncomment for mail sending testing
+  # mailpit:
+  #   image: axllent/mailpit
+  #   container_name: mailpit
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./data:/data
+  #   ports:
+  #     - 8025:8025
+  #     - 1025:1025
+  #   environment:
+  #     MP_MAX_MESSAGES: 5000
