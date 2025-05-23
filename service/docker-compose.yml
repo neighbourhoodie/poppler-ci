@@ -28,9 +28,7 @@ services:
       - buildbot
 
   flask:
-    image: "poppler-ci-test1"
-    working_dir: /buildbot/web
-    command: flask run --debug --host=0.0.0.0
+    build: ../web
     volumes:
       - ../web:/buildbot/web
       - ../refs:/buildbot/refs
