@@ -206,7 +206,11 @@ prefix.
 
 ### Authorization
 
-`nginx` with [basic auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/) is used to restrict access to certain parts of the CI. To create and manage user credentials, you can use a tool like `htpasswd`. At the root of the project, run the following command, replacing `USERNAME` with your chosen username:
+`nginx` with [basic
+auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
+is used to restrict access to certain parts of the CI. To create and manage user
+credentials, you can use a tool like `htpasswd`. At the root of the project, run
+the following command, replacing `USERNAME` with your chosen username:
 
 ```sh
 htpasswd -c ./service/etc/nginx-backend/.htpasswd <USERNAME>
