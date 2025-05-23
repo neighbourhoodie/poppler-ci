@@ -9,6 +9,8 @@ services:
       BUILDBOT_WORKER_PORT: 9989
       BUILDBOT_WEB_URL: http://127.0.0.1:8010/
       BUILDBOT_WEB_PORT: tcp:port=8010
+      BUILDBOT_REPO_URL: https://gitlab.freedesktop.org/poppler/poppler.git
+      BUILDBOT_REPO_BRANCH: master
       # default email settings for mailpit, see below
       # adjust to real SMTP service in production
       BUILDBOT_EMAIL_HOST: mailpit
