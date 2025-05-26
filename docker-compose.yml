@@ -41,8 +41,6 @@ services:
       - ./services/flask:/buildbot/flask
       - ./refs:/buildbot/refs
       - ./outputs:/buildbot/outputs
-    ports:
-      - "5000:5000"
 
   nginx-app:
     image: nginx
