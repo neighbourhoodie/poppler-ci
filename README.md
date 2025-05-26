@@ -172,8 +172,9 @@ later use `docker compose down` to stop them again.
 - A server, and ssh with root access to it
 - A domain name set up to point to the server's IP address
 - An email address where Certbot can send emails to
-- The ability to git clone this repo onto the server, or get it there some other
-  way
+- The ability to git clone the following repositories onto the server, or get it there some other way:
+  - `poppler-ci` (this repository)
+  - [`buildbot`](https://github.com/buildbot/buildbot), and modify it following the instructions written in [Worker set up](#worker-set-up) and [Building the Workers](#building-the-workers)
 - Be able to install on the server:
   - Docker
   - Docker Compose (`apt install -y docker-compose`)
@@ -235,7 +236,7 @@ prefix.
 `nginx` with [basic
 auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
 is used to restrict access to certain parts of the CI. To create and manage user
-credentials, you can use a tool like `htpasswd`. At the root of the project, run
+credentials, you can use a tool like `htpasswd`. At the root of the `poppler-ci` project, run
 the following command, replacing `USERNAME` with your chosen username:
 
 ```sh
@@ -263,7 +264,7 @@ Or manually delete the line with that username from the file.
 
 ### Final step
 
-Once you've finished all the previous steps successfully, run:
+Once you've finished all the previous steps successfully, locate yourself at the root of the `poppler-ci` project, and run:
 
 ```shell
 docker compose up
