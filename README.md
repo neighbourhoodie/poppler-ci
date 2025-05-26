@@ -11,7 +11,6 @@ service. The infrastructure uses [Docker Compose]() and
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Worker set up](#worker-set-up)
-    - [Building the Workers](#building-the-workers)
     - [Running the Service (locally)](#running-the-service-locally)
   - [Running the Service (in production)](#running-the-service-in-production)
     - [Prerequisites for the initial set up](#prerequisites-for-the-initial-set-up)
@@ -106,9 +105,9 @@ commands:
 
 ```sh
 # TODO: replace this with a repo on Poppler's GitLab
-$ git clone https://github.com/neighbourhoodie/poppler-buildbot.git
-$ cd poppler-buildbot/worker
-$ docker build -t poppler-ci-test1 .
+git clone https://github.com/neighbourhoodie/poppler-buildbot.git
+cd poppler-buildbot/worker
+docker build -t poppler-ci-test1 .
 ```
 
 ### Running the Service (locally)
@@ -138,7 +137,7 @@ later use `docker compose down` to stop them again.
 - An email address where Certbot can send emails to
 - The ability to git clone the following repositories onto the server, or get it there some other way:
   - `poppler-ci` (this repository)
-  - [`buildbot`](https://github.com/buildbot/buildbot), and modify it following the instructions written in [Worker set up](#worker-set-up) and [Building the Workers](#building-the-workers)
+  - [`poppler-buildbot`](https://github.com/neighbourhoodie/poppler-buildbot.git) (TODO: replace this with a repo on Poppler's GitLab)
 - Be able to install on the server:
   - Docker
   - Docker Compose (`apt install -y docker-compose`)
