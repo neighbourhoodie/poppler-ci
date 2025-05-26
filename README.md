@@ -170,6 +170,7 @@ later use `docker compose down` to stop them again.
 
 - A server, and ssh with root access to it
 - A domain name set up to point to the server's IP address
+- An email address where Certbot can send emails to
 - The ability to git clone this repo onto the server, or get it there some other
   way
 - Be able to install on the server:
@@ -186,7 +187,7 @@ Let's encrypt to issue the TLS certificate, follow these steps:
 2. Create an `.env` file with your variables:
 
 ```sh
-cp services/nginx-https/.env{.default,}
+cp services/nginx-https/.env.default services/nginx-https/.env
 ```
 
 and with the editor of your choice (we're demoing with `nano`), fill the
@@ -196,7 +197,7 @@ variables:
 nano services/nginx-https/.env
 ```
 
-2. Run the installation script
+3. Run the installation script
 
 Go to the `services/nginx-https` folder and run `certbot-install.sh`:
 
@@ -250,8 +251,13 @@ htpasswd -D services/nginx-app/etc/nginx/.htpasswd <USERNAME>
 
 Or manually delete the line with that username from the file.
 
+### Final step
 
-TODO:
+Once you've finished all the previous steps successfully, run:
 
-- auth?
-- remove all instances of `poppler-ci-test1` (rename it for something better)
+```shell
+docker compose up
+```
+
+This launches all components and makes the Buildbot Web UI available at
+the domain you have specified in your `.env` file.
