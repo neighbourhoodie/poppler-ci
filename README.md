@@ -99,52 +99,16 @@ The tasks available are:
 ### Worker set up
 
 Poppler builbot-worker's configuration is based on the default one provided by
-[Builbot](https://github.com/buildbot/buildbot). However, Poppler currently
-requires Debian testing to execute its test with. For that purpose, we need to
-modify the default
-[Dockerfile](https://github.com/buildbot/buildbot/blob/7d203fc581d7f4a320f0091f983b55f8afa55bf2/worker/Dockerfile)
-with a few tweaks:
+[Builbot](https://github.com/buildbot/buildbot), but needs to be based on
+`debian:testing` and requires some additional packages. These changes are
+applied in our fork of the Buildbot repository. To build the worker, run these
+commands:
 
-1. Use `debian:testing` as the image to pull from instead of `debian:12`:
-
-```yaml
-FROM docker.io/library/debian:testing
-```
-
-2. Prepare the build environment with the required dependencies, adding the
-   following command:
-
-```yaml
-RUN echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get build-dep --yes --no-install-recommends poppler \
-    && apt-get install --yes --no-install-recommends \
-        ca-certificates \
-        git \
-        libboost-container-dev \
-        libbrotli-dev \
-        libcurl4-openssl-dev \
-        libgtk-3-dev \
-        locales \
-        ninja-build \
-        python-is-python3 \
-        python3-pil \
-        qt6-base-dev \
-        rsync
-```
-
-This means that whenever a new version of the default Dockerfile is released,
-these modifications must be reapplied on top of it.
-
-### Building the Workers
-
-To be able to run the workers, you first have to build them. In order to do
-that, check out the `poppler-buildbot` repository.
-
-```shell
-cd poppler-buildbot
-cd worker
-docker build -t poppler-ci-test1 .
+```sh
+# TODO: replace this with a repo on Poppler's GitLab
+$ git clone https://github.com/neighbourhoodie/poppler-buildbot.git
+$ cd poppler-buildbot/worker
+$ docker build -t poppler-ci-test1 .
 ```
 
 ### Running the Service (locally)
