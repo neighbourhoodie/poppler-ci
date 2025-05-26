@@ -7,8 +7,7 @@ service. The infrastructure uses [Docker Compose]() and
   - [Overview](#overview)
     - [Buildbot](#buildbot)
     - [Workers](#workers)
-      - [Build \& Test](#build--test)
-      - [Fetch Sources \& Create Refs](#fetch-sources--create-refs)
+    - [Flask admin app](#flask-admin-app)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Worker set up](#worker-set-up)
@@ -16,8 +15,10 @@ service. The infrastructure uses [Docker Compose]() and
     - [Running the Service (locally)](#running-the-service-locally)
   - [Running the Service (in production)](#running-the-service-in-production)
     - [Prerequisites for the initial set up](#prerequisites-for-the-initial-set-up)
+    - [Setting hostnames](#setting-hostnames)
     - [TLS](#tls)
     - [Authorization](#authorization)
+    - [Final step](#final-step)
 
 ## Overview
 
