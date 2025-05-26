@@ -11,7 +11,6 @@ service. The infrastructure uses [Docker Compose]() and
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Worker set up](#worker-set-up)
-    - [Building the Workers](#building-the-workers)
     - [Running the Service (locally)](#running-the-service-locally)
   - [Running the Service (in production)](#running-the-service-in-production)
     - [Prerequisites for the initial set up](#prerequisites-for-the-initial-set-up)
@@ -99,51 +98,15 @@ The tasks available are:
 ### Worker set up
 
 Poppler builbot-worker's configuration is based on the default one provided by
-[Builbot](https://github.com/buildbot/buildbot). However, Poppler currently
-requires Debian testing to execute its test with. For that purpose, we need to
-modify the default
-[Dockerfile](https://github.com/buildbot/buildbot/blob/7d203fc581d7f4a320f0091f983b55f8afa55bf2/worker/Dockerfile)
-with a few tweaks:
+[Builbot](https://github.com/buildbot/buildbot), but needs to be based on
+`debian:testing` and requires some additional packages. These changes are
+applied in our fork of the Buildbot repository. To build the worker, run these
+commands:
 
-1. Use `debian:testing` as the image to pull from instead of `debian:12`:
-
-```yaml
-FROM docker.io/library/debian:testing
-```
-
-2. Prepare the build environment with the required dependencies, adding the
-   following command:
-
-```yaml
-RUN echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get build-dep --yes --no-install-recommends poppler \
-    && apt-get install --yes --no-install-recommends \
-        ca-certificates \
-        git \
-        libboost-container-dev \
-        libbrotli-dev \
-        libcurl4-openssl-dev \
-        libgtk-3-dev \
-        locales \
-        ninja-build \
-        python-is-python3 \
-        python3-pil \
-        qt6-base-dev \
-        rsync
-```
-
-This means that whenever a new version of the default Dockerfile is released,
-these modifications must be reapplied on top of it.
-
-### Building the Workers
-
-To be able to run the workers, you first have to build them. In order to do
-that, check out the `poppler-buildbot` repository.
-
-```shell
-cd poppler-buildbot
-cd worker
+```sh
+# TODO: replace this with a repo on Poppler's GitLab
+git clone https://github.com/neighbourhoodie/poppler-buildbot.git
+cd poppler-buildbot/worker
 docker build -t poppler-ci-test1 .
 ```
 
@@ -172,8 +135,9 @@ later use `docker compose down` to stop them again.
 - A server, and ssh with root access to it
 - A domain name set up to point to the server's IP address
 - An email address where Certbot can send emails to
-- The ability to git clone this repo onto the server, or get it there some other
-  way
+- The ability to git clone the following repositories onto the server, or get it there some other way:
+  - `poppler-ci` (this repository)
+  - [`poppler-buildbot`](https://github.com/neighbourhoodie/poppler-buildbot.git) (TODO: replace this with a repo on Poppler's GitLab)
 - Be able to install on the server:
   - Docker
   - Docker Compose (`apt install -y docker-compose`)
@@ -235,7 +199,7 @@ prefix.
 `nginx` with [basic
 auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
 is used to restrict access to certain parts of the CI. To create and manage user
-credentials, you can use a tool like `htpasswd`. At the root of the project, run
+credentials, you can use a tool like `htpasswd`. At the root of the `poppler-ci` project, run
 the following command, replacing `USERNAME` with your chosen username:
 
 ```sh
@@ -263,7 +227,7 @@ Or manually delete the line with that username from the file.
 
 ### Final step
 
-Once you've finished all the previous steps successfully, run:
+Once you've finished all the previous steps successfully, locate yourself at the root of the `poppler-ci` project, and run:
 
 ```shell
 docker compose up
