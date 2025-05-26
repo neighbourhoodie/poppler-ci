@@ -22,7 +22,7 @@ http {
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
     location / {
-      proxy_pass http://nginx_backend:8010;
+      proxy_pass http://nginx-app:8010;
 
       proxy_set_header REMOTE_USER $remote_user;
       proxy_set_header X-REMOTE-USER $remote_user;

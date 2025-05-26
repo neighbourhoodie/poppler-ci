@@ -1,16 +1,15 @@
 services:
   buildbot:
     image: buildbot/buildbot-master:master
-    env_file:
-      - db.env
     environment:
+      BUILDBOT_REPO_URL: https://gitlab.freedesktop.org/poppler/poppler.git
+      BUILDBOT_REPO_BRANCH: master
       BUILDBOT_CONFIG_DIR: config
       BUILDBOT_CONFIG_URL: https://github.com/buildbot/buildbot-docker-example-config/archive/master.tar.gz
+      BUILDBOT_DB_URL: sqlite:///db/state.sqlite
       BUILDBOT_WORKER_PORT: 9989
       BUILDBOT_WEB_URL: http://127.0.0.1:8010/
       BUILDBOT_WEB_PORT: tcp:port=8010
-      BUILDBOT_REPO_URL: https://gitlab.freedesktop.org/poppler/poppler.git
-      BUILDBOT_REPO_BRANCH: master
       # default email settings for mailpit, see below
       # adjust to real SMTP service in production
       BUILDBOT_EMAIL_HOST: mailpit
@@ -19,8 +18,8 @@ services:
       BUILDBOT_EMAIL_PASS: buildbot
       BUILDBOT_MAILNG_LIST: list@poppler.example.com
     volumes:
-      - ../master.cfg:/buildbot/master.cfg
-      - ../sqlite/:/buildbot/db/
+      - ./services/buildbot/master.cfg:/buildbot/master.cfg
+      - ./sqlite/:/buildbot/db/
 
   worker:
     image: "poppler-ci-test1"
@@ -31,40 +30,40 @@ services:
       WORKERPASS: pass
       WORKER_ENVIRONMENT_BLACKLIST: DOCKER_BUILDBOT* BUILDBOT_ENV_* BUILDBOT_1* WORKER_ENVIRONMENT_BLACKLIST
     volumes:
-      - ../refs:/buildbot/refs
-      - ../outputs:/buildbot/outputs
+      - ./refs:/buildbot/refs
+      - ./outputs:/buildbot/outputs
     links:
       - buildbot
 
   flask:
-    build: ../web
+    build: services/flask
     volumes:
-      - ../web:/buildbot/web
-      - ../refs:/buildbot/refs
-      - ../outputs:/buildbot/outputs
+      - ./services/flask:/buildbot/flask
+      - ./refs:/buildbot/refs
+      - ./outputs:/buildbot/outputs
     ports:
       - "5000:5000"
 
-  nginx_frontend:
+  nginx-app:
+    image: nginx
+    volumes:
+      - ./services/nginx-app/etc/nginx:/etc/nginx
+      - ./refs:/public/refs
+      - ./outputs:/public/outputs
+    ports:
+      - "8010:80"
+
+  nginx-https:
     image: nginx
     env_file:
-      - .env
+      - services/nginx-https/.env
     volumes:
-      - ./etc/nginx-frontend:/etc/nginx
-      - ./etc/letsencrypt:/etc/letsencrypt
-      - ./var/lib/letsencrypt:/var/lib/letsencrypt
+      - ./services/nginx-https/etc/nginx:/etc/nginx
+      - ./services/nginx-https/etc/letsencrypt:/etc/letsencrypt
+      - ./services/nginx-https/var/lib/letsencrypt:/var/lib/letsencrypt
     ports:
       - "80:80"
       - "443:443"
-
-  nginx_backend:
-    image: nginx
-    volumes:
-      - ./etc/nginx-backend:/etc/nginx
-      - ../refs:/public/refs
-      - ../outputs:/public/outputs
-    ports:
-      - "8010:80"
 
   # uncomment for mail sending testing
   # mailpit:

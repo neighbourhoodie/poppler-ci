@@ -1,9 +1,5 @@
 FROM docker.io/library/debian:testing
 
-# Last build date - this can be updated whenever there are security updates so
-# that everything is rebuilt
-ENV security_updates_as_of 2023-09-01
-
 # This will make apt-get install without question
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -15,6 +11,6 @@ RUN apt-get update \
     && useradd -ms /bin/bash buildbot
 
 USER buildbot
-WORKDIR /buildbot/web
+WORKDIR /buildbot/flask
 
 CMD ["flask", "run", "--debug", "--host=0.0.0.0"]
