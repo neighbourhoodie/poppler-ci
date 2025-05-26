@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Clean up build outputs</h1>
+  <h2>Clean up build outputs</h2>
 
   <form method="post" action="{{ url_for("cleanup_builds_submit") }}">
     <p><label for="max_builds">Builds to keep</label>

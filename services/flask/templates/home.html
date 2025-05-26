@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Poppler CI Admin</h1>
+  <h2>Poppler CI Admin</h2>
 
-  <ul>
-    <li><a href="{{ url_for("update_refs_form") }}">Update refs from a build</a></li>
-    <li><a href="{{ url_for("cleanup_builds_form") }}">Clean up build outputs</a></li>
-  </ul>
 {% endblock %}
