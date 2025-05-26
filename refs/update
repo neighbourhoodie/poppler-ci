@@ -60,7 +60,7 @@
 # The following options are supported:
 #
 #     --refs-path <PATH>
-#           The path to the `refs` directory reliative to $PWD
+#           The path to the `refs` directory relative to $PWD
 #
 #     --poppler-path <PATH>
 #           The path to the root of the `poppler` repository; the script
