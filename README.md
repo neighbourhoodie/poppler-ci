@@ -178,6 +178,15 @@ later use `docker compose down` to stop them again.
   - Docker Compose (`apt install -y docker-compose`)
   - htpasswd (`apt install -y apache2-utils`)
 
+### Setting hostnames
+
+The Buildbot service needs to know the domain name that is used to access it in
+the browser. In development, this is `http://127.0.0.1:8010`. In production,
+this needs to be set to your own domain.
+
+In `docker-compose.yml`, edit `BUILDBOT_WEB_URL` to reflect the server's public
+URL, e.g. `https://ci.example.com`.
+
 ### TLS
 
 To enable HTTPS in buildbot's website, Certbot is used. To set it up and allow
