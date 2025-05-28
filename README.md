@@ -116,12 +116,31 @@ For testing this setup locally or on a server, you can follow these steps. If
 you want to set this up permanently on a server, there are more instructions
 below.
 
+1. Locate yourself at the root project of `poppler-ci`.
+2. Set up your environment variables.
+
+```sh
+cp services/nginx-https/.env.default services/nginx-https/.env
+```
+
+and with the editor of your choice (we're demoing with `nano`), fill the
+variables:
+
+```sh
+nano services/nginx-https/.env
+```
+
+If you don't have the final values of these variables, put some placeholder ones.
+
+3. Set up a user. Follow the steps in [Authorization](#authorization).
+4. Launch the services:
 ```shell
 docker compose up
 ```
 
 This launches all components and makes the Buildbot Web UI available at
-`http://127.0.0.1:8180`.
+`http://127.0.0.1:8010`. You will be requested to login, you can do so with
+the credential created in step 3.
 
 Use `ctrl-c` once to stop all services.
 
