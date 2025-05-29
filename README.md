@@ -75,7 +75,7 @@ maintainer decides that these failing tests actually represent desired changes.
 
 This application provides admin functions that cannot be expressed directly in
 Buildbot. The application can be accessed via the url `/cmd` on the build
-server.
+server. Access is currently restricted to the username `admin`.
 
 The tasks available are:
 
@@ -216,21 +216,17 @@ prefix.
 ### Authorization
 
 `nginx` with [basic
-auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
-is used to restrict access to certain parts of the CI. To create and manage user
-credentials, you can use a tool like `htpasswd`. At the root of the `poppler-ci` project, run
-the following command, replacing `USERNAME` with your chosen username:
+auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/) is used to restrict access to certain parts of the CI. To create and manage user credentials, you can use a tool like `htpasswd`. At the root of the `poppler-ci` project, run the following command:
 
 ```sh
-htpasswd -c services/nginx-app/etc/nginx/.htpasswd <USERNAME>
+htpasswd -c services/nginx-app/etc/nginx/.htpasswd admin
 ```
 
-You'll be prompted to enter and confirm a password. This command creates a
-`.htpasswd` file containing the username and a hashed password.
+You'll be prompted to enter and confirm a password for the username `admin`. This command creates a `.htpasswd` file containing the username and a hashed password. Note that certain parts of the application are only accessible to this `admin` user (e.g. [flask admin app](#flask-admin-app)). 
 
 To manage access:
 
-- Add a new user to an existing file
+- Add a new user to an existing file (replace `USERNAME` with your chosen username)
 
 ```sh
 htpasswd services/nginx-app/etc/nginx/.htpasswd <USERNAME>
