@@ -145,7 +145,17 @@ the credential created in step 3.
 Use `ctrl-c` once to stop all services.
 
 You can use `docker-compose up -d` to start all services in the background and
-later use `docker compose down` to stop them again.
+later use `docker-compose down` to stop them again.
+
+#### Testing Emails
+
+To test the sending of emails, uncomment the `mailpit` section in
+`docker-compose.yml`. Then use the `docker-compose [up|down|restart]` commands
+to restart the setup.
+
+Once launched, you can go to http://127.0.0.1:8025 and see an empty email inbox.
+Should an automated build fail, the address configured as `BUILDBOT_MAILNG_LIST`
+receives a status email and those show up in the email inbox for introspection.
 
 ## Running the Service (in production)
 
@@ -154,6 +164,7 @@ later use `docker compose down` to stop them again.
 - A server, and ssh with root access to it
 - A domain name set up to point to the server's IP address
 - An email address where Certbot can send emails to
+- An SMTP server that Buildbot can use to send notification emails.
 - The ability to git clone the following repositories onto the server, or get it there some other way:
   - `poppler-ci` (this repository)
   - [`poppler-buildbot`](https://github.com/neighbourhoodie/poppler-buildbot.git) (TODO: replace this with a repo on Poppler's GitLab)
@@ -239,6 +250,12 @@ htpasswd -D services/nginx-app/etc/nginx/.htpasswd <USERNAME>
 ```
 
 Or manually delete the line with that username from the file.
+
+### Email
+
+To send notification emails, Buildbot needs to be pointed to an SMTP server.
+You can customise `docker-compose.yml`’s `BUILDBOT_EMAIL_*` variables
+accordingly.
 
 ### Final step
 
