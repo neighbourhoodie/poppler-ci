@@ -110,6 +110,20 @@ cd poppler-buildbot/worker
 docker build -t poppler-ci-test1 .
 ```
 
+If you need to add more dependencies, modify the Dockerfile located at `poppler-buildbot/worker/Dockerfile`.
+
+To apply the changes, rebuild the Docker image:
+
+```sh
+docker build -t poppler-ci-test1 .
+```
+
+And finally, restart the containers to use the updated image:
+
+```sh
+docker compose restart
+```
+
 ### Running the Service (locally)
 
 For testing this setup locally or on a server, you can follow these steps. If
