@@ -236,6 +236,12 @@ prepare_tmp_directory () {
 
   mkdir -p "$dir/$name"
   mkdir -p "$dir/tmp"
+
+  if [[ -d "$dir/tmp/$name" ]] ; then
+    rsync -a "$dir/tmp/$name/" "$dir/$name/"
+    rm -rf "$dir/tmp/$name"
+  fi
+
   mv "$dir/$name" "$dir/tmp/$name"
   mkdir -p "$dir/$name"
 }
