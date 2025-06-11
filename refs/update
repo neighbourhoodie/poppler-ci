@@ -158,8 +158,7 @@ update_refs_from_corpus () {
 
   prepare_directory_structure "$corpus_dir"
 
-  download_new_files "$manifest_path" \
-      "$corpus_dir/sources" "$corpus_dir/tmp/sources"
+  download_new_files "$manifest_path" "$corpus_dir/sources"
 
   generate_new_refs "$corpus_dir"
 }
@@ -167,7 +166,6 @@ update_refs_from_corpus () {
 download_new_files () {
   local manifest_path="$1"
   local dst_dir="$2"
-  local src_dir="$3"
 
   local filename
   local url
@@ -177,7 +175,7 @@ download_new_files () {
   fi
 
   cat "$manifest_path" | while read -r filename url ; do
-    if [[ ! -e "$src_dir/$filename" || "$USE_FORCE" == yes ]] ; then
+    if [[ ! -e "$dst_dir/$filename" || "$USE_FORCE" == yes ]] ; then
       echo "Fetching: $url ..."
       curl "$url" -o "$dst_dir/$filename"
     fi
@@ -215,7 +213,7 @@ create_refs_from_test_repo () {
 
   for filepath in "$src_dir"/* ; do
     filename="$(basename "$filepath")"
-    if [[ "$filename" != *.pdf || ! -e "$dst_dir/tmp/sources/$filename" || "$USE_FORCE" == yes ]] ; then
+    if [[ "$filename" != *.pdf || ! -e "$dst_dir/sources/$filename" || "$USE_FORCE" == yes ]] ; then
       cp -r "$filepath" "$dst_dir/sources/$filename"
     fi
   done
@@ -226,42 +224,13 @@ create_refs_from_test_repo () {
 prepare_directory_structure () {
   local dir="$1"
 
-  prepare_tmp_directory "$dir" 'sources'
-  prepare_tmp_directory "$dir" 'outputs'
-}
-
-prepare_tmp_directory () {
-  local dir="$1"
-  local name="$2"
-
-  mkdir -p "$dir/$name"
-  mkdir -p "$dir/tmp"
-
-  if [[ -d "$dir/tmp/$name" ]] ; then
-    rsync -a "$dir/tmp/$name/" "$dir/$name/"
-    rm -rf "$dir/tmp/$name"
-  fi
-
-  mv "$dir/$name" "$dir/tmp/$name"
-  mkdir -p "$dir/$name"
-}
-
-merge_tmp_directory () {
-  local dir="$1"
-  local name="$2"
-
-  rsync -a "$dir/$name/" "$dir/tmp/$name/"
-  rm -rf "$dir/$name"
-  mv "$dir/tmp/$name" "$dir/$name"
+  mkdir -p "$dir/sources"
+  mkdir -p "$dir/outputs"
 }
 
 generate_new_refs () {
   local dir="$1"
-
   create_refs "$dir"/{sources,outputs}
-
-  merge_tmp_directory "$dir" 'sources'
-  merge_tmp_directory "$dir" 'outputs'
 }
 
 create_refs () {
