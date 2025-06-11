@@ -167,19 +167,13 @@ download_new_files () {
   local manifest_path="$1"
   local dst_dir="$2"
 
-  local filename
-  local url
-
   if [[ ! -f "$manifest_path" ]] ; then
     fail "Manifest file not found at: $manifest_path"
   fi
 
-  cat "$manifest_path" | while read -r filename url ; do
-    if [[ ! -e "$dst_dir/$filename" || "$USE_FORCE" == yes ]] ; then
-      echo "Fetching: $url ..."
-      curl "$url" -o "$dst_dir/$filename"
-    fi
-  done
+  cd "$POPPLER_PATH/regtest"
+  ./poppler-regtest download-files --files-dir "$dst_dir" "$manifest_path"
+  cd -
 }
 
 update_refs_from_test_repo () {
